@@ -48,6 +48,7 @@ export default function AddStudent({
   const [selectedGender, setSelectedGender] = useState('' as string);
 
   const handleAvailability = (value: string) => {
+    console.log(value);
     setSelectedGender(value);
   };
 
