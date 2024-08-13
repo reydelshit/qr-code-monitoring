@@ -9,6 +9,11 @@ const Root = () => {
 
   const [showSidebar, setShowSidebar] = useState(false);
 
+  const handleLogout = () => {
+    localStorage.removeItem('isLoggedIn_QR');
+    localStorage.removeItem('role');
+    window.location.href = '/login';
+  };
   return (
     <div className="flex h-dvh w-dvw items-center justify-center overflow-y-hidden">
       <div className="mx-auto flex h-full w-full gap-4">
@@ -52,7 +57,12 @@ const Root = () => {
             Toggle Sidebar
           </Button> */}
 
-          <Button className="absolute bottom-2 left-2 right-2">Logout</Button>
+          <Button
+            onClick={handleLogout}
+            className="absolute bottom-2 left-2 right-2"
+          >
+            Logout
+          </Button>
         </div>
 
         <div className="h-full w-full">
