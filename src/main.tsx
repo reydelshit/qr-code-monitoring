@@ -7,6 +7,7 @@ import AttendanceLog from './pages/AttendanceLog';
 import Reports from './pages/Reports';
 import StudentManagement from './pages/StudentManagement';
 import ScanStation from './pages/ScanStation';
+import ViewStudentDetails from './components/manage-student/ViewStudentDetails';
 
 const router = createBrowserRouter([
   {
@@ -24,6 +25,11 @@ const router = createBrowserRouter([
       {
         path: 'StudentManagement',
         element: <StudentManagement />,
+      },
+
+      {
+        path: 'StudentManagement/:id',
+        element: <ViewStudentDetails />,
       },
 
       {

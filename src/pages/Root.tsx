@@ -1,3 +1,5 @@
+import { Toaster } from '@/components/ui/toaster';
+import { useToast } from '@/components/ui/use-toast';
 import Dashboard from '@/pages/Dashboard';
 import { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
@@ -41,6 +43,8 @@ const Root = () => {
           {params.pathname === '/' ? <Dashboard /> : <Outlet />}
         </div>
       </div>
+
+      <Toaster />
     </div>
   );
 };

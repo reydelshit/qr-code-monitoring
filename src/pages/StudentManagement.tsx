@@ -1,4 +1,5 @@
 import AddStudent from '@/components/manage-student/AddStudent';
+import EditStudent from '@/components/manage-student/EditStudent';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -11,6 +12,8 @@ import {
 } from '@/components/ui/table';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import QRCode from 'react-qr-code';
+import { Link } from 'react-router-dom';
 
 interface Student {
   student_id: string;
@@ -31,6 +34,8 @@ interface Student {
 const StudentManagement = () => {
   const [showStudentForm, setShowStudentForm] = useState(false);
   const [students, setStudents] = useState<Student[]>([]);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [studentID, setStudentID] = useState('');
 
   const fetchStudents = () => {
     axios.get(`${import.meta.env.VITE_SERVER_LINK}/student.php`).then((res) => {
@@ -50,6 +55,11 @@ const StudentManagement = () => {
         console.log(res.data);
         fetchStudents();
       });
+  };
+
+  const handleEdit = (student_id: string) => {
+    setStudentID(student_id);
+    setShowEditForm(true);
   };
 
   useEffect(() => {
@@ -95,7 +105,21 @@ const StudentManagement = () => {
                     alt="student"
                   />
                 </TableCell>
-                <TableCell>{student.student_id_code}</TableCell>
+                <TableCell>
+                  <div>
+                    <QRCode
+                      size={15}
+                      style={{
+                        height: 'auto',
+                        maxWidth: '100%',
+                        width: '50%',
+                      }}
+                      value={student.student_id_code}
+                      viewBox={`0 0 256 256`}
+                    />
+                  </div>
+                  {student.student_id_code}
+                </TableCell>
                 <TableCell>{student.student_name}</TableCell>
                 <TableCell>{student.student_datebirth}</TableCell>
                 <TableCell>{student.student_address}</TableCell>
@@ -103,9 +127,18 @@ const StudentManagement = () => {
                 <TableCell>
                   <div className="flex items-center justify-center gap-2">
                     <Button className="bg-green-500 text-white">
-                      View More
+                      <Link to={`/StudentManagement/${student.student_id}`}>
+                        View
+                      </Link>
                     </Button>
-                    <Button className="bg-blue-500 text-white">Edit</Button>
+                    <Button
+                      onClick={() => {
+                        handleEdit(student.student_id);
+                      }}
+                      className="bg-blue-500 text-white"
+                    >
+                      Edit
+                    </Button>
                     <Button
                       onClick={() => {
                         handleDelete(student.student_id);
@@ -125,6 +158,15 @@ const StudentManagement = () => {
       {showStudentForm && (
         <div className="absolute top-0 flex w-full max-w-[100%] items-center justify-center bg-white bg-opacity-80">
           <AddStudent setShowStudentForm={setShowStudentForm} />
+        </div>
+      )}
+
+      {showEditForm && (
+        <div className="absolute top-0 flex w-full max-w-[100%] items-center justify-center bg-white bg-opacity-80">
+          <EditStudent
+            setShowEditForm={setShowEditForm}
+            studentID={studentID}
+          />
         </div>
       )}
     </div>

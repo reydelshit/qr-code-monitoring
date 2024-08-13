@@ -13,7 +13,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import axios from 'axios';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import QRCode from 'react-qr-code';
 // import { URL } from 'url';
 
 type ChangeEvent =
@@ -26,6 +27,7 @@ interface Student {
   student_image_path: string;
   student_firstname: string;
   student_lastname: string;
+  student_name: string;
   student_middlename: string;
   student_datebirth: string;
   student_grade_level: string;
@@ -34,18 +36,40 @@ interface Student {
   student_parent_name: string;
   student_parent_number: string;
   student_parent_email: string;
+  student_address: string;
+  student_gender: string;
 }
 
-export default function AddStudent({
-  setShowStudentForm,
+export default function EditStudent({
+  setShowEditForm,
+  studentID,
 }: {
-  setShowStudentForm: (value: boolean) => void;
+  setShowEditForm: (value: boolean) => void;
+  studentID: string;
 }) {
   const [student, setStudent] = useState<Student>({} as Student);
   const { toast } = useToast();
   const [image, setImage] = useState<string | null>(null);
   const [error, setError] = useState('' as string);
   const [selectedGender, setSelectedGender] = useState('' as string);
+
+  const fetchStudentData = () => {
+    axios
+      .get(`${import.meta.env.VITE_SERVER_LINK}/student.php`, {
+        params: {
+          student_id: studentID,
+        },
+      })
+      .then((res) => {
+        console.log(res.data, 'sss');
+        setStudent(res.data[0]);
+        setImage(res.data[0].student_image_path);
+      });
+  };
+
+  useEffect(() => {
+    fetchStudentData();
+  }, []);
 
   const handleGender = (value: string) => {
     console.log(value);
@@ -57,7 +81,7 @@ export default function AddStudent({
     const name = e.target.name;
     setStudent((values) => ({ ...values, [name]: value }));
   };
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmitUpdate = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!image) {
@@ -68,20 +92,18 @@ export default function AddStudent({
     console.log(student);
 
     axios
-      .post(`${import.meta.env.VITE_SERVER_LINK}/student.php`, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+      .put(`${import.meta.env.VITE_SERVER_LINK}/student.php`, {
         ...student,
-        student_name: `${student.student_firstname} ${student.student_lastname} ${student.student_middlename}`,
+        student_name: student.student_name,
         student_image_path: image,
-        student_gender: selectedGender,
+        student_gender: student.student_gender || selectedGender,
       })
       .then((res) => {
-        console.log(res.data);
+        console.log(res.data, 'updated');
+
         if (res.data.status === 'success') {
           window.location.reload();
-          setShowStudentForm(false);
+          setShowEditForm(false);
           toast({
             title: 'product: Added Successfully',
             description: 'product has been added successfully',
@@ -105,18 +127,22 @@ export default function AddStudent({
   return (
     <div className="relative flex w-[80%] flex-col items-center justify-center rounded-md border-2 bg-white text-center shadow-lg">
       <span
-        onClick={() => setShowStudentForm(false)}
+        onClick={() => setShowEditForm(false)}
         className="absolute right-4 top-2 cursor-pointer text-2xl"
       >
         x
       </span>
       <div className="flex w-full flex-col items-center gap-[1rem] p-2">
-        <form className="w-full px-4 text-start" onSubmit={handleSubmit}>
+        <form className="w-full px-4 text-start" onSubmit={handleSubmitUpdate}>
           <div className="flex gap-4">
             <div className="flex w-[25rem] flex-col">
               <img
                 className="mb-4 h-[20rem] w-full rounded-lg object-cover"
-                src={image! ? image! : defaultProfile}
+                src={
+                  image!
+                    ? `${import.meta.env.VITE_SERVER_LINK}/${student.student_image_path}`
+                    : defaultProfile
+                }
               />
               <Label className="mb-2 text-start">Student image</Label>
 
@@ -125,55 +151,54 @@ export default function AddStudent({
                 accept="image/*"
                 onChange={handleChangeImage}
                 className="cursor-pointer"
-                required
               />
+
+              <div className="mt-4 w-full">
+                {' '}
+                <QRCode
+                  size={15}
+                  style={{
+                    height: 'auto',
+                    maxWidth: '100%',
+                    width: '100%',
+                  }}
+                  value={student.student_id_code || '0'}
+                  viewBox={`0 0 256 256`}
+                />
+              </div>
             </div>
 
             <div className="w-full">
               <Label className="my-2 block text-2xl">Basic Information</Label>
-              <div className="w-full">
-                <Label className="mb-2 text-start">Student ID</Label>
-                <Input
-                  name="student_id_code"
-                  className="mb-2"
-                  required
-                  onChange={handleChange}
-                />
+              <div className="flex w-full items-end gap-4">
+                <div className="w-full">
+                  <Label className="mb-2 text-start">Student ID</Label>
+                  <Input
+                    name="student_id_code"
+                    className="mb-2 w-[100%]"
+                    onChange={handleChange}
+                    defaultValue={student.student_id_code}
+                  />
+                </div>
               </div>
-
               <div className="flex gap-4">
                 <div className="w-full">
-                  <Label className="mb-2 text-start">First Name</Label>
+                  <Label className="mb-2 text-start">Full Name</Label>
                   <Input
-                    name="student_firstname"
+                    name="student_name"
                     className="mb-2"
-                    required
                     onChange={handleChange}
-                  />
-                </div>
-
-                <div className="w-full">
-                  <Label className="mb-2 text-start">Last Name</Label>
-                  <Input
-                    name="student_lastname"
-                    className="mb-2"
-                    required
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="w-full">
-                  <Label className="mb-2 text-start">Middle Name</Label>
-                  <Input
-                    name="student_middlename"
-                    className="mb-2"
-                    required
-                    onChange={handleChange}
+                    defaultValue={student.student_name}
                   />
                 </div>
               </div>
               <div className="item-start flex flex-col">
-                <Label className="mb-2 text-start">Date of Birth</Label>
+                <Label className="mb-2 text-start">
+                  Date of Birth{' '}
+                  <span className="font-bold underline">
+                    ({student.student_datebirth})
+                  </span>
+                </Label>
                 <Input
                   type="date"
                   name="student_datebirth"
@@ -188,19 +213,18 @@ export default function AddStudent({
                   <Input
                     name="student_address"
                     className="mb-2"
-                    required
                     onChange={handleChange}
+                    defaultValue={student.student_address}
                   />
                 </div>
 
                 <div className="mb-[2rem] w-full text-start">
-                  <Label className="mb-2">Gender</Label>
+                  <Label className="mb-2">
+                    Gender
+                    <span>({student.student_gender})</span>
+                  </Label>
 
-                  <Select
-                    required
-                    value={selectedGender}
-                    onValueChange={handleGender}
-                  >
+                  <Select value={selectedGender} onValueChange={handleGender}>
                     <SelectTrigger>
                       <SelectValue placeholder="Gender" />
                     </SelectTrigger>
@@ -219,8 +243,8 @@ export default function AddStudent({
                 <Input
                   name="student_program"
                   className="mb-2"
-                  required
                   onChange={handleChange}
+                  defaultValue={student.student_program}
                 />
               </div>
               <div className="flex gap-4">
@@ -229,8 +253,8 @@ export default function AddStudent({
                   <Input
                     name="student_grade_level"
                     className="mb-2"
-                    required
                     onChange={handleChange}
+                    defaultValue={student.student_grade_level}
                   />
                 </div>
 
@@ -239,8 +263,8 @@ export default function AddStudent({
                   <Input
                     name="student_block_section"
                     className="mb-2"
-                    required
                     onChange={handleChange}
+                    defaultValue={student.student_block_section}
                   />
                 </div>
               </div>
@@ -252,8 +276,8 @@ export default function AddStudent({
                 <Input
                   name="student_parent_name"
                   className="mb-2"
-                  required
                   onChange={handleChange}
+                  defaultValue={student.student_parent_name}
                 />
               </div>
               <div className="flex gap-4">
@@ -264,9 +288,9 @@ export default function AddStudent({
                   <Input
                     name="student_parent_number"
                     className="mb-2"
-                    required
                     type="number"
                     onChange={handleChange}
+                    defaultValue={student.student_parent_number}
                   />
                 </div>
 
@@ -279,6 +303,7 @@ export default function AddStudent({
                     className="mb-2"
                     type="email"
                     onChange={handleChange}
+                    defaultValue={student.student_parent_email}
                   />
                 </div>
               </div>
@@ -289,7 +314,7 @@ export default function AddStudent({
 
           <div className="my-4 flex justify-end gap-4">
             <Button
-              onClick={() => setShowStudentForm(false)}
+              onClick={() => setShowEditForm(false)}
               className="w-[20%] self-center bg-[#585a57] text-white hover:border-2 hover:border-[#41644A] hover:bg-white hover:text-[#41644A]"
             >
               Cancel
@@ -298,7 +323,7 @@ export default function AddStudent({
               className="w-[20%] self-center bg-[#41644A] text-white hover:border-2 hover:border-[#41644A] hover:bg-white hover:text-[#41644A]"
               type="submit"
             >
-              Add Student
+              Update
             </Button>
           </div>
         </form>
