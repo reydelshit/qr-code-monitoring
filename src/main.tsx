@@ -8,6 +8,7 @@ import Reports from './pages/Reports';
 import StudentManagement from './pages/StudentManagement';
 import ScanStation from './pages/ScanStation';
 import ViewStudentDetails from './components/manage-student/ViewStudentDetails';
+import Login from './pages/Login';
 
 const router = createBrowserRouter([
   {
@@ -37,6 +38,10 @@ const router = createBrowserRouter([
         element: <ScanStation />,
       },
     ],
+  },
+  {
+    path: '/login',
+    element: <Login />,
   },
 ]);
 
