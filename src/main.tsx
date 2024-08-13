@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import Root from './components/Root';
+import Root from './pages/Root';
 import './index.css';
 import AttendanceLog from './pages/AttendanceLog';
 import Reports from './pages/Reports';

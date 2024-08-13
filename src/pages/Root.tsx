@@ -9,7 +9,7 @@ const Root = () => {
 
   return (
     <div className="flex h-dvh w-dvw items-center justify-center overflow-y-hidden">
-      <div className="mx-auto flex h-full w-full gap-4 border-2">
+      <div className="mx-auto flex h-full w-full gap-4">
         <div className="relative flex h-screen w-[200px] flex-col border-r-[1px] p-2">
           <Link className="p-2" to="/">
             Dashboard
@@ -36,7 +36,7 @@ const Root = () => {
           </Button> */}
         </div>
 
-        <div className="h-full w-full border-2 border-orange-600">
+        <div className="h-full w-full">
           {/* This is where the child routes get rendered */}
           {params.pathname === '/' ? <Dashboard /> : <Outlet />}
         </div>
