@@ -19,28 +19,42 @@ import { useState } from 'react';
 type ChangeEvent =
   | React.ChangeEvent<HTMLInputElement>
   | React.ChangeEvent<HTMLTextAreaElement>;
+
+interface Student {
+  student_id: string;
+  student_id_code: string;
+  student_image_path: string;
+  student_firstname: string;
+  student_lastname: string;
+  student_middlename: string;
+  student_datebirth: string;
+  student_grade_level: string;
+  student_program: string;
+  student_block_section: string;
+  student_parent_name: string;
+  student_parent_number: string;
+  student_parent_email: string;
+}
+
 export default function AddStudent({
   setShowStudentForm,
 }: {
   setShowStudentForm: (value: boolean) => void;
 }) {
-  const [product, setProduct] = useState([]);
+  const [student, setStudent] = useState<Student>({} as Student);
   const { toast } = useToast();
   const [image, setImage] = useState<string | null>(null);
   const [error, setError] = useState('' as string);
-  const [price, setPrice] = useState(0);
-  const [selectedAvailability, setSelectedAvailability] = useState(
-    '' as string,
-  );
+  const [selectedGender, setSelectedGender] = useState('' as string);
 
   const handleAvailability = (value: string) => {
-    setSelectedAvailability(value);
+    setSelectedGender(value);
   };
 
   const handleChange = (e: ChangeEvent) => {
     const value = e.target.value;
     const name = e.target.name;
-    setProduct((values) => ({ ...values, [name]: value }));
+    setStudent((values) => ({ ...values, [name]: value }));
   };
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -50,14 +64,17 @@ export default function AddStudent({
       return;
     }
 
+    console.log(student);
+
     axios
-      .post(`${import.meta.env.VITE_BRITANIKA_LOCAL_HOST}/product.php`, {
+      .post(`${import.meta.env.VITE_SERVER_LINK}/student.php`, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        ...product,
-        product_image: image,
-        availability_status: selectedAvailability,
+        ...student,
+        student_name: `${student.student_firstname} ${student.student_lastname} ${student.student_middlename}`,
+        student_image_path: image,
+        student_gender: selectedGender,
       })
       .then((res) => {
         console.log(res.data);
@@ -80,8 +97,6 @@ export default function AddStudent({
       const base64 = data.result;
       if (base64) {
         setImage(base64.toString());
-
-        // console.log(base64.toString());
       }
     };
   };
@@ -118,7 +133,7 @@ export default function AddStudent({
               <div className="w-full">
                 <Label className="mb-2 text-start">Student ID</Label>
                 <Input
-                  name="student_id"
+                  name="student_id_code"
                   className="mb-2"
                   required
                   onChange={handleChange}
@@ -159,8 +174,8 @@ export default function AddStudent({
               <div className="item-start flex flex-col">
                 <Label className="mb-2 text-start">Date of Birth</Label>
                 <Input
-                  type="datetime-local"
-                  name="student_birthday"
+                  type="date"
+                  name="student_datebirth"
                   className="mb-2"
                   onChange={handleChange}
                 />
@@ -182,7 +197,7 @@ export default function AddStudent({
 
                   <Select
                     required
-                    value={selectedAvailability}
+                    value={selectedGender}
                     onValueChange={handleAvailability}
                   >
                     <SelectTrigger>
@@ -211,7 +226,7 @@ export default function AddStudent({
                 <div className="w-full">
                   <Label className="mb-2 text-start">Grade Level</Label>
                   <Input
-                    name="student_level"
+                    name="student_grade_level"
                     className="mb-2"
                     required
                     onChange={handleChange}
@@ -234,7 +249,7 @@ export default function AddStudent({
               <div className="w-full">
                 <Label className="mb-2 text-start">Parent/Guardian Name</Label>
                 <Input
-                  name="student_parguard_name"
+                  name="student_parent_name"
                   className="mb-2"
                   required
                   onChange={handleChange}
@@ -246,7 +261,7 @@ export default function AddStudent({
                     Parent/Guardian Phone Number(s)
                   </Label>
                   <Input
-                    name="student_parguard_phone"
+                    name="student_parent_number"
                     className="mb-2"
                     required
                     type="number"
@@ -259,7 +274,7 @@ export default function AddStudent({
                     Parent/Guardian Email Address (Optional)
                   </Label>
                   <Input
-                    name="student_parguard_email"
+                    name="student_parent_email"
                     className="mb-2"
                     type="email"
                     onChange={handleChange}
